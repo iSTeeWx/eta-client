@@ -1,10 +1,8 @@
 package net.optifine.shaders;
 
 import net.minecraft.src.Config;
-import net.minecraft.util.ResourceLocation;
 import net.optifine.config.ConnectedParser;
 import net.optifine.reflect.Reflector;
-import net.optifine.reflect.ReflectorForge;
 import net.optifine.shaders.config.MacroProcessor;
 import net.optifine.util.PropertiesOrdered;
 import net.optifine.util.StrUtils;
@@ -42,38 +40,16 @@ public class ItemAliases {
         reset();
 
         if (shaderPack != null) {
-            if (Reflector.Loader_getActiveModList.exists() && Config.getResourceManager() == null) {
-                Config.dbg("[Shaders] Delayed loading of item mappings after resources are loaded");
-                updateOnResourcesReloaded = true;
-            } else {
-                List<Integer> list = new ArrayList();
-                String s = "/shaders/item.properties";
-                InputStream inputstream = shaderPack.getResourceAsStream(s);
+            List<Integer> list = new ArrayList<>();
+            String s = "/shaders/item.properties";
+            InputStream inputstream = shaderPack.getResourceAsStream(s);
 
-                if (inputstream != null) {
-                    loadItemAliases(inputstream, s, list);
-                }
-
-                loadModItemAliases(list);
-
-                if (list.size() > 0) {
-                    itemAliases = toArray(list);
-                }
+            if (inputstream != null) {
+                loadItemAliases(inputstream, s, list);
             }
-        }
-    }
 
-    private static void loadModItemAliases(List<Integer> listItemAliases) {
-        String[] astring = ReflectorForge.getForgeModIds();
-
-        for (int i = 0; i < astring.length; ++i) {
-            String s = astring[i];
-
-            try {
-                ResourceLocation resourcelocation = new ResourceLocation(s, "shaders/item.properties");
-                InputStream inputstream = Config.getResourceStream(resourcelocation);
-                loadItemAliases(inputstream, resourcelocation.toString(), listItemAliases);
-            } catch (IOException var6) {
+            if (!list.isEmpty()) {
+                itemAliases = toArray(list);
             }
         }
     }

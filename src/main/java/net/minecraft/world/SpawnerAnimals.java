@@ -17,7 +17,6 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.optifine.BlockPosM;
 import net.optifine.reflect.Reflector;
-import net.optifine.reflect.ReflectorForge;
 
 import java.util.*;
 
@@ -142,7 +141,7 @@ public final class SpawnerAnimals {
                                                     entityliving = this.mapSampleEntitiesByClass.get(biomegenbase$spawnlistentry.entityClass);
 
                                                     if (entityliving == null) {
-                                                        entityliving = biomegenbase$spawnlistentry.entityClass.getConstructor(new Class[]{World.class}).newInstance(new Object[]{worldServerIn});
+                                                        entityliving = biomegenbase$spawnlistentry.entityClass.getConstructor(new Class[]{World.class}).newInstance(worldServerIn);
                                                         this.mapSampleEntitiesByClass.put(biomegenbase$spawnlistentry.entityClass, entityliving);
                                                     }
                                                 } catch (Exception exception1) {
@@ -151,14 +150,12 @@ public final class SpawnerAnimals {
                                                 }
 
                                                 entityliving.setLocationAndAngles(f, i3, f1, worldServerIn.rand.nextFloat() * 360.0F, 0.0F);
-                                                boolean flag2 = Reflector.ForgeEventFactory_canEntitySpawn.exists() ? ReflectorForge.canEntitySpawn(entityliving, worldServerIn, f, (float) i3, f1) : entityliving.getCanSpawnHere() && entityliving.isNotColliding();
+                                                boolean flag2 = entityliving.getCanSpawnHere() && entityliving.isNotColliding();
 
                                                 if (flag2) {
                                                     this.mapSampleEntitiesByClass.remove(biomegenbase$spawnlistentry.entityClass);
 
-                                                    if (!ReflectorForge.doSpecialSpawn(entityliving, worldServerIn, f, i3, f1)) {
-                                                        ientitylivingdata = entityliving.onInitialSpawn(worldServerIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
-                                                    }
+                                                    ientitylivingdata = entityliving.onInitialSpawn(worldServerIn.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
 
                                                     if (entityliving.isNotColliding()) {
                                                         ++j2;
@@ -187,7 +184,7 @@ public final class SpawnerAnimals {
         }
     }
 
-    protected static BlockPos getRandomChunkPosition(World worldIn, int x, int z) {
+    private static BlockPos getRandomChunkPosition(World worldIn, int x, int z) {
         Chunk chunk = worldIn.getChunkFromChunkCoords(x, z);
         int i = x * 16 + worldIn.rand.nextInt(16);
         int j = z * 16 + worldIn.rand.nextInt(16);
@@ -255,18 +252,10 @@ public final class SpawnerAnimals {
                             EntityLiving entityliving;
 
                             try {
-                                entityliving = biomegenbase$spawnlistentry.entityClass.getConstructor(new Class[]{World.class}).newInstance(new Object[]{worldIn});
+                                entityliving = biomegenbase$spawnlistentry.entityClass.getConstructor(new Class[]{World.class}).newInstance(worldIn);
                             } catch (Exception exception1) {
                                 exception1.printStackTrace();
                                 continue;
-                            }
-
-                            if (Reflector.ForgeEventFactory_canEntitySpawn.exists()) {
-                                Object object = Reflector.call(Reflector.ForgeEventFactory_canEntitySpawn, entityliving, worldIn, Float.valueOf((float) j + 0.5F), Integer.valueOf(blockpos.getY()), Float.valueOf((float) k + 0.5F));
-
-                                if (object == ReflectorForge.EVENT_RESULT_DENY) {
-                                    continue;
-                                }
                             }
 
                             entityliving.setLocationAndAngles((float) j + 0.5F, blockpos.getY(), (float) k + 0.5F, randomIn.nextFloat() * 360.0F, 0.0F);

@@ -29,8 +29,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
@@ -70,8 +68,7 @@ public class IntegratedServer extends MinecraftServer {
             NBTTagCompound nbttagcompound = worldinfo.getPlayerNBTTagCompound();
 
             if (nbttagcompound != null && nbttagcompound.hasKey("Dimension")) {
-                int i = nbttagcompound.getInteger("Dimension");
-                PacketThreadUtil.lastDimensionId = i;
+                PacketThreadUtil.lastDimensionId = nbttagcompound.getInteger("Dimension");
                 this.mc.loadingScreen.setLoadingProgress(-1);
             }
         }
@@ -83,12 +80,9 @@ public class IntegratedServer extends MinecraftServer {
 
     protected void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, String worldNameIn2) {
         this.convertMapIfNeeded(saveName);
-        boolean flag = Reflector.DimensionManager.exists();
 
-        if (!flag) {
-            this.worldServers = new WorldServer[3];
-            this.timeOfLastDimensionTick = new long[this.worldServers.length][100];
-        }
+        this.worldServers = new WorldServer[3];
+        this.timeOfLastDimensionTick = new long[this.worldServers.length][100];
 
         ISaveHandler isavehandler = this.getActiveAnvilConverter().getSaveLoader(saveName, true);
         this.setResourcePackFromWorld(this.getFolderName(), isavehandler);
@@ -100,64 +94,36 @@ public class IntegratedServer extends MinecraftServer {
             worldinfo.setWorldName(worldNameIn);
         }
 
-        if (flag) {
-            WorldServer worldserver = this.isDemo() ? (WorldServer) (new DemoWorldServer(this, isavehandler, worldinfo, 0, this.theProfiler)).init() : (WorldServer) (new WorldServer(this, isavehandler, worldinfo, 0, this.theProfiler)).init();
-            worldserver.initialize(this.theWorldSettings);
-            Integer[] ainteger = (Integer[]) Reflector.call(Reflector.DimensionManager_getStaticDimensionIDs, new Object[0]);
-            Integer[] ainteger1 = ainteger;
-            int i = ainteger.length;
+        for (int l = 0; l < this.worldServers.length; ++l) {
+            int i1 = 0;
 
-            for (int j = 0; j < i; ++j) {
-                int k = ainteger1[j].intValue();
-                WorldServer worldserver1 = k == 0 ? worldserver : (WorldServer) (new WorldServerMulti(this, isavehandler, k, worldserver, this.theProfiler)).init();
-                worldserver1.addWorldAccess(new WorldManager(this, worldserver1));
-
-                if (!this.isSinglePlayer()) {
-                    worldserver1.getWorldInfo().setGameType(this.getGameType());
-                }
-
-                if (Reflector.EventBus.exists()) {
-                    Reflector.postForgeBusEvent(Reflector.WorldEvent_Load_Constructor, worldserver1);
-                }
+            if (l == 1) {
+                i1 = -1;
             }
 
-            this.getConfigurationManager().setPlayerManager(new WorldServer[]{worldserver});
-
-            if (worldserver.getWorldInfo().getDifficulty() == null) {
-                this.setDifficultyForAllWorlds(this.mc.gameSettings.difficulty);
+            if (l == 2) {
+                i1 = 1;
             }
-        } else {
-            for (int l = 0; l < this.worldServers.length; ++l) {
-                int i1 = 0;
 
-                if (l == 1) {
-                    i1 = -1;
-                }
-
-                if (l == 2) {
-                    i1 = 1;
-                }
-
-                if (l == 0) {
-                    if (this.isDemo()) {
-                        this.worldServers[l] = (WorldServer) (new DemoWorldServer(this, isavehandler, worldinfo, i1, this.theProfiler)).init();
-                    } else {
-                        this.worldServers[l] = (WorldServer) (new WorldServer(this, isavehandler, worldinfo, i1, this.theProfiler)).init();
-                    }
-
-                    this.worldServers[l].initialize(this.theWorldSettings);
+            if (l == 0) {
+                if (this.isDemo()) {
+                    this.worldServers[l] = (WorldServer) (new DemoWorldServer(this, isavehandler, worldinfo, i1, this.theProfiler)).init();
                 } else {
-                    this.worldServers[l] = (WorldServer) (new WorldServerMulti(this, isavehandler, i1, this.worldServers[0], this.theProfiler)).init();
+                    this.worldServers[l] = (WorldServer) (new WorldServer(this, isavehandler, worldinfo, i1, this.theProfiler)).init();
                 }
 
-                this.worldServers[l].addWorldAccess(new WorldManager(this, this.worldServers[l]));
+                this.worldServers[l].initialize(this.theWorldSettings);
+            } else {
+                this.worldServers[l] = (WorldServer) (new WorldServerMulti(this, isavehandler, i1, this.worldServers[0], this.theProfiler)).init();
             }
 
-            this.getConfigurationManager().setPlayerManager(this.worldServers);
+            this.worldServers[l].addWorldAccess(new WorldManager(this, this.worldServers[l]));
+        }
 
-            if (this.worldServers[0].getWorldInfo().getDifficulty() == null) {
-                this.setDifficultyForAllWorlds(this.mc.gameSettings.difficulty);
-            }
+        this.getConfigurationManager().setPlayerManager(this.worldServers);
+
+        if (this.worldServers[0].getWorldInfo().getDifficulty() == null) {
+            this.setDifficultyForAllWorlds(this.mc.gameSettings.difficulty);
         }
 
         this.initialWorldChunkLoad();
@@ -218,7 +184,7 @@ public class IntegratedServer extends MinecraftServer {
             super.tick();
 
             if (this.mc.gameSettings.renderDistanceChunks != this.getConfigurationManager().getViewDistance()) {
-                logger.info("Changing view distance to {}, from {}", Integer.valueOf(this.mc.gameSettings.renderDistanceChunks), Integer.valueOf(this.getConfigurationManager().getViewDistance()));
+                logger.info("Changing view distance to {}, from {}", Integer.valueOf(this.mc.gameSettings.renderDistanceChunks), this.getConfigurationManager().getViewDistance());
                 this.getConfigurationManager().setViewDistance(this.mc.gameSettings.renderDistanceChunks);
             }
 
@@ -342,7 +308,7 @@ public class IntegratedServer extends MinecraftServer {
 
             try {
                 i = HttpUtil.getSuitableLanPort();
-            } catch (IOException var5) {
+            } catch (IOException ignored) {
             }
 
             if (i <= 0) {
@@ -373,11 +339,9 @@ public class IntegratedServer extends MinecraftServer {
 
     public void initiateShutdown() {
         if (!Reflector.MinecraftForge.exists() || this.isServerRunning()) {
-            Futures.getUnchecked(this.addScheduledTask(new Runnable() {
-                public void run() {
-                    for (EntityPlayerMP entityplayermp : Lists.newArrayList(IntegratedServer.this.getConfigurationManager().getPlayerList())) {
-                        IntegratedServer.this.getConfigurationManager().playerLoggedOut(entityplayermp);
-                    }
+            Futures.getUnchecked(this.addScheduledTask(() -> {
+                for (EntityPlayerMP entityplayermp : Lists.newArrayList(IntegratedServer.this.getConfigurationManager().getPlayerList())) {
+                    IntegratedServer.this.getConfigurationManager().playerLoggedOut(entityplayermp);
                 }
             }));
         }
