@@ -27,7 +27,7 @@ public class ReflectorClass implements IResolvable {
             try {
                 this.targetClass = Class.forName(this.targetClassName);
             } catch (ClassNotFoundException var2) {
-                Log.log("(Reflector) Class not present: " + this.targetClassName);
+//                Log.log("(Reflector) Class not present: " + this.targetClassName);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }

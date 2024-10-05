@@ -14,13 +14,13 @@ public class FieldLocatorActionKeyF3 implements IFieldLocator {
         Field field = this.getFieldRenderChunksMany();
 
         if (field == null) {
-            Config.log("(Reflector) Field not present: " + oclass.getName() + ".actionKeyF3 (field renderChunksMany not found)");
+//            Config.log("(Reflector) Field not present: " + oclass.getName() + ".actionKeyF3 (field renderChunksMany not found)");
             return null;
         } else {
             Field field1 = ReflectorRaw.getFieldAfter(Minecraft.class, field, Boolean.TYPE, 0);
 
             if (field1 == null) {
-                Config.log("(Reflector) Field not present: " + oclass.getName() + ".actionKeyF3");
+//                Config.log("(Reflector) Field not present: " + oclass.getName() + ".actionKeyF3");
                 return null;
             } else {
                 return field1;

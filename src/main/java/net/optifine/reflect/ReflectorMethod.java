@@ -44,16 +44,16 @@ public class ReflectorMethod implements IResolvable {
                         Method[] amethod = getMethods(oclass, this.targetMethodName);
 
                         if (amethod.length <= 0) {
-                            Log.log("(Reflector) Method not present: " + oclass.getName() + "." + this.targetMethodName);
+//                            Log.log("(Reflector) Method not present: " + oclass.getName() + "." + this.targetMethodName);
                             return null;
                         }
 
                         if (amethod.length > 1) {
-                            Log.warn("(Reflector) More than one method found: " + oclass.getName() + "." + this.targetMethodName);
+//                            Log.warn("(Reflector) More than one method found: " + oclass.getName() + "." + this.targetMethodName);
 
                             for (int i = 0; i < amethod.length; ++i) {
                                 Method method = amethod[i];
-                                Log.warn("(Reflector)  - " + method);
+//                                Log.warn("(Reflector)  - " + method);
                             }
 
                             return null;
@@ -65,7 +65,7 @@ public class ReflectorMethod implements IResolvable {
                     }
 
                     if (this.targetMethod == null) {
-                        Log.log("(Reflector) Method not present: " + oclass.getName() + "." + this.targetMethodName);
+//                        Log.log("(Reflector) Method not present: " + oclass.getName() + "." + this.targetMethodName);
                         return null;
                     } else {
                         this.targetMethod.setAccessible(true);
