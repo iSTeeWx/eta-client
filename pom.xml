@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.marcloud.mcp.189</groupId>
-    <artifactId>MCP</artifactId>
+    <groupId>me.isteewx</groupId>
+    <artifactId>etaclient</artifactId>
     <version>1.8.9</version>
     <description>MCP for 1.8.9</description>
 
