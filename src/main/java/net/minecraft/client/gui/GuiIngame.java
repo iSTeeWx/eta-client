@@ -3,6 +3,7 @@ package net.minecraft.client.gui;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import me.isteewx.eta.event.impl.Event2D;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -91,6 +92,8 @@ public class GuiIngame extends Gui {
         int j = scaledresolution.getScaledHeight();
         this.mc.entityRenderer.setupOverlayRendering();
         GlStateManager.enableBlend();
+
+        new Event2D.Pre(scaledresolution).post();
 
         if (Config.isVignetteEnabled()) {
             this.renderVignette(this.mc.thePlayer.getBrightness(partialTicks), scaledresolution);
@@ -281,6 +284,8 @@ public class GuiIngame extends Gui {
         } else {
             this.overlayPlayerList.updatePlayerList(false);
         }
+
+        new Event2D.Post(scaledresolution).post();
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableLighting();
